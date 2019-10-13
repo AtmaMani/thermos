@@ -39,3 +39,6 @@ def generate_random_ints():
     random_list = generate_unique_random_integers(num_random, upper_limit)
 
     return json.dumps(random_list)
+
+if __name__ == '__main__':
+    app.run()
