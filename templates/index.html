@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thermos - building webapis with flask</title>
+</head>
+<body>
+<p>
+    Welcome! This site is an example of what you can build with Python.
+    Libraries such as Flask, sqlalchemy, requests, arcgis were used to build the backend.
+    Gunicorn is used to serve this on Heroku.
+</p>
+<p>
+    Resources in this site:
+    <ul>
+        <li>
+            <a href="/hello">Hello</a>. Called as <a href="/hello?name='value'">/hello?name='value'</a>
+        </li>
+        <li>
+            <a href="/genUniqueRandom">Generate Unique Random numbers</a>
+        </li>
+        <li>
+            <a href="/imageOfDay">NASA image of day</a>
+        </li>
+        <li>
+            <a href="/fileUpload">File upload</a>
+        </li>
+
+        <li>
+            <a href="/geocodeAddress">Geocode address</a>
+        </li>
+        <li>
+            CRUD operations on a DB
+        </li>
+    </ul>
+</p>
+<p>
+    A little bit about the machine running this site:
+
+    <h5>System path: {{sys_path}}</h5>
+    <h4>OS type: {{os_type}}; OS name: {{os_name}}</h4>
+    <h4>Machine name: {{mac_name}}; Mac IP: {{mac_ip}}</h4>
+
+</p>
+</body>
+</html>

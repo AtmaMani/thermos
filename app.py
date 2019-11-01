@@ -1,34 +1,44 @@
+# basic imports
 from flask import Flask
 app = Flask(import_name=__name__)
-import json
-from executor import generate_unique_random_integers
+
+# import to parse wildcard args
 from flask import request
 
-@app.route('/')
+# import to render html pages
+from flask import render_template
+
+# other imports
+import json
+from executor import generate_unique_random_integers
+import os, sys, socket
+
+# define the root resource
+@app.route('/', methods=['GET'])
+def index_page():
+
+    return render_template('index.html',
+                           sys_path = str(sys.path),
+                           os_type = str(sys.platform),
+                           os_name = str(os.name),
+                           mac_name = str(socket.gethostname()),
+                           mac_ip = str(socket.gethostbyname(socket.gethostname())))
+
+@app.route('/hello', methods=['GET'])
 def hello_world():
-    return_dict = {'level':'/',
-                   'message':'Hello user!'}
+    """
+    Called as /hello?name='atma'
+    :return:
+    """
+    # if user sends payload to variable name, get it. Else empty string
+    name = request.args.get('name', '')
+    return f'Hello {name}'
 
-    return json.dumps(return_dict)
 
-@app.route('/user/<string:username>')
-def show_user_profile(username):
-    if username == 'atma':
-        user_id = 1
-    elif username == 'su':
-        user_id = 2
-    else:
-        user_id = 99
-
-    return_dict = {'level':'/user/{}'.format(username),
-                   'user_id':user_id}
-
-    return json.dumps(return_dict)
-
-@app.route('/genrandom')
+@app.route('/genUniqueRandom', methods=['GET'])
 def generate_random_ints():
     """
-    Called as 127.0.0.1:5000/genrandom?numRandom=20&upperLimit=30
+    Called as 127.0.0.1:5000/genUniqueRandom?numRandom=20&upperLimit=30
     :return:
     """
     query = request.args.to_dict()
