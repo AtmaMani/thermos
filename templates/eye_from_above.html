@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eye from Above - Landsat views</title>
+</head>
+<body>
+    {% if media_type == 'image' %}
+        <img src={{media_url}} class="img-fluid" alt="Responsive image">
+    {% elif media_type == 'video' %}
+        <iframe src={{media_url}} allowfullscreen></iframe>
+    {% else %}
+        <h4>Did not understand the media type</h4>
+    {% endif %}
+
+    <h5>date: {{img_date}}</h5>
+    <h5>id: {{img_id}}</h5>
+    <h5>dataset: {{img_dataset}}</h5>
+</body>
+</html>
