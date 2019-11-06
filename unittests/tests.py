@@ -2,8 +2,10 @@ import unittest
 import requests
 import json
 
+
 class TestThermos(unittest.TestCase):
-    base_address = 'http://localhost:5000'
+    base_address = 'http://localhost:5000' # for local dev
+    # base_address = 'http://atma-thermos.herokuapp.com' # for testing production
 
     def test_root(self):
         resp = requests.get(self.base_address + '/')
