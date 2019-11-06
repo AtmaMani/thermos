@@ -1,21 +1,24 @@
 # thermos
-Experiments with a Python's Flask based web server.
+**Experiments with a Python's Flask based web server.**
+![](https://cdn.pixabay.com/photo/2018/08/28/20/21/jug-3638398_960_720.jpg)
 
 This tiny project shows how to build RESTful APIs with Flask. You can define endpoints and the code that needs to be executed when invoked. You can send messages via the REST API and act on it in your Python code.
 
+## Quickstart
 ### Creating your dev env
-To run, first clone the dev env using the `environment.yml` file. To do so, run:
+To run, first clone this repo and enter its folder in terminal. Then clone  the dev env using the `requirements.txt` file. To do so first create a conda env by running:
 ```
-conda create --file environment.yml
+conda create env --name flask2 python
+```
+then install the dependencies by running:
+```
+pip install -r requirements.txt
 ```
 
 ### Running this project
-Then to run the web server run this the first time (you are setting which file needs to be executed when Flask is called):
+All endpoints are defined in a single `app.py` which is what should be run by the web server. After you activate and install the dependencies, from the terminal run:
+
 ```
-export FLASK_APP = thermos.py
+python -m app
 ```
-and to start the web server, run:
-```
-python -m flask run
-```
-Then open your browser on the IP address flask prints on terminal, usually it is `127.0.0.1:5000`. After you update the Python files, stop and restart the server for changes to take effect.
+which will start the web server and give you an address to hit. There is a simple HTML frontpage that you can use as UI or you can interact with the REST endpoints programmatically.
