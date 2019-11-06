@@ -1,21 +1,12 @@
 # region imports
 from flask import Flask
 app = Flask(import_name=__name__)
-
-# import to parse wildcard args
-from flask import request
-
-# import to render html pages
-from flask import render_template
-
-# to handle errors and reload the same resource
-from flask import redirect
-
-# to flash messages on screen
-from flask import flash
-
-# to return files over web
-from flask import send_from_directory
+from flask import request # import to parse wildcard args
+from flask import render_template # import to render html pages
+from flask import redirect # to handle errors and reload the same resource
+from flask import flash # to flash messages on screen
+from flask import send_from_directory # to return files over web
+from flask import jsonify # turn responses to safe jsons
 
 # other imports
 import json
@@ -24,11 +15,23 @@ from geocode_tool import geocode_address_executor
 import os, sys, socket
 from roti_rot import rot13
 import requests
+
+# imports to talk to DB
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from address_db_model import Base, Address
+from dbops import create_address, read_address, update_address, delete_address, read_all_addresses
 # end region
 
 # region startup routine
 with open('xrl.txt', 'r') as read_handle:
     key = rot13(read_handle.readline())
+
+# Connect to DB
+engine = create_engine('sqlite:///addresses.db')
+Base.metadata.bin = engine
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 # end region
 
 # define the root resource
@@ -45,6 +48,7 @@ def index_page():
                            mac_name = str(socket.gethostname()),
                            mac_ip=mac_ip)
 
+
 @app.route('/hello', methods=['GET'])
 def hello_world():
     """
@@ -54,6 +58,7 @@ def hello_world():
     # if user sends payload to variable name, get it. Else empty string
     name = request.args.get('name', '')
     return f'Hello {name}'
+
 
 @app.route('/genUniqueRandom', methods=['GET'])
 def generate_random_ints():
@@ -70,6 +75,7 @@ def generate_random_ints():
 
     return json.dumps(random_list)
 
+
 @app.route('/geocodeAddress', methods=['GET'])
 def geocode_address():
     """
@@ -78,13 +84,20 @@ def geocode_address():
     """
     address = request.args.get('address', '380 New York St, Redlands, CA')
     geocode_dict = geocode_address_executor(address)
+
+    # write address to db
+    create_address(session, search_string=address,
+                   lat=geocode_dict['location']['y'],
+                   lon=geocode_dict['location']['x'])
     return json.dumps(geocode_dict)
+
 
 @app.route('/eyeFromAbove', methods=['GET', 'POST'])
 def eye_from_above():
     """
     If GET request - Displays a html page with box to enter address
     if POST request - renders output html with image from above
+    POST called as /eyeFromAbove?address='123 Main St, City, State'&date=2013-12-17
     :return:
     """
     if request.method == 'POST':
@@ -102,6 +115,11 @@ def eye_from_above():
             geocode_dict = geocode_address_executor(address)
             lon = geocode_dict['location']['x']
             lat = geocode_dict['location']['y']
+
+            # write address to db
+            create_address(session, search_string=address,
+                           lat=geocode_dict['location']['y'],
+                           lon=geocode_dict['location']['x'])
 
         else: # when no address is loaded
             flash('No address specified')
@@ -167,6 +185,56 @@ def eye_from_above():
 def uploaded_file(filename):
     return send_from_directory('eye_in_sky_queries',
                                filename)
+
+# db ops
+@app.route('/addresses', methods=['GET', 'POST'])
+def addresses_handler():
+    """
+    GET - called as /addresses
+    POST - called as /addresses?addressList=['str address1','str2']
+    :return:
+    """
+    if request.method == 'GET':
+        # read all addresses available and return
+        return jsonify(read_all_addresses(session))
+
+    elif request.method == 'POST':
+        # add inputs to database
+        address_list = request.form.get('addressList', [])
+        if isinstance(address_list, list):
+            for a in address_list:
+                create_address(session, search_string=a, lat=0, lon=0)
+                return jsonify({'success':True})
+        elif isinstance(address_list, str):
+            address_list2 = address_list.split(';')
+            for a in address_list2:
+                create_address(session, search_string=a, lat=0, lon=0)
+            return jsonify({'success': True})
+        else:
+            return jsonify(read_all_addresses(session))
+
+
+@app.route('/addresses/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def address_id_handler(id):
+    """
+    GET - called as /addresses/25
+    PUT - called to update as /addresses/25?address='abc'&lat=25&lon=89
+    DELETE - called as /addresses/25
+    :param id:
+    :return:
+    """
+    if request.method == 'GET':
+        return jsonify(read_address(session, address_id=id))
+
+    elif request.method == 'PUT':
+        address = request.form.get('address','dummy')
+        lat = request.form.get('lat',0.1)
+        lon = request.form.get('lon',0.1)
+        update_address(session, address_id=id, search_string=address, lat=lat, lon=lon)
+        return jsonify({'success': True})
+
+    elif request.method == 'DELETE':
+        delete_address(session, id)
 
 if __name__ == '__main__':
     app.run()
