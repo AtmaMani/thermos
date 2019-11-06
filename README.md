@@ -22,3 +22,18 @@ All endpoints are defined in a single `app.py` which is what should be run by th
 python -m app
 ```
 which will start the web server and give you an address to hit. There is a simple HTML frontpage that you can use as UI or you can interact with the REST endpoints programmatically.
+
+
+## Publishing to Heroku
+These are the general steps
+
+1. Install all dependencies using `pip` as conda support is not matured yet.
+2. Freeze dependencies using `pip freeze -r requirements.txt`
+3. Create a `Procfile` with contents `web: gunicorn app:app`. Here we switch from Flask server to Gunicorn which is a light weight, but production ready server.
+4. Install Heroku CLI, create an account, make keys, login to client.
+5. Create Heroku app as `heroku apps:create atma-thermos`. Note: you need to name it differently as the name I chose is taken by me.
+6. Test locally using `heroku local web`.
+7. Commit your changes. Push to both remotes.
+```git
+
+```
